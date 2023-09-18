@@ -1,0 +1,20 @@
+// package algorithms
+
+// // khởi tạo default = 1000
+// func create(m int) []bool {
+// 	b := make([]bool, m)
+// 	return b
+// }
+
+// func add[T any](bits []bool, v T) {
+// 	// Duyệt qua các hàm hash
+
+// 	// setbit := 1 << hf(v)
+// 	// bits |=
+// }
+
+// func search[T any](bits []bool, v T) {
+// 	// Duyệt qua các hàm hash
+// 	// checkbit = 1 << hf(v)
+// 	// if checkbit &
+// }
