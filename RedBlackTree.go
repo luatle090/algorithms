@@ -38,26 +38,19 @@ func CreateRedBlackTree[T Ordered]() *RedBlackTree[T] {
 		right:  nil,
 		parent: nil,
 	}
+
+	tree.root = tree.blackNodeSentinel
 	return tree
 }
 
 // Khởi tạo node đỏ đen mới, color by default is red
 func initNodeRedBack[T Ordered](val T, blackNodeSentinel, parrent *NodeRedBlack[T]) *NodeRedBlack[T] {
 	return &NodeRedBlack[T]{
+		key:    val,
 		color:  Red,
 		left:   blackNodeSentinel,
 		right:  blackNodeSentinel,
 		parent: parrent,
-	}
-}
-
-func (t *RedBlackTree[T]) initRootRedBlack(val T) {
-	t.root = &NodeRedBlack[T]{
-		color:  Black,
-		key:    val,
-		left:   t.blackNodeSentinel,
-		right:  t.blackNodeSentinel,
-		parent: t.blackNodeSentinel,
 	}
 }
 
@@ -66,7 +59,8 @@ func (rb *RedBlackTree[T]) GetSize() int {
 	return rb.numOfNode
 }
 
-func (rb *RedBlackTree[T]) GetNode(val T) *NodeRedBlack[T] {
+// Searching by key
+func (rb *RedBlackTree[T]) SearchNode(val T) *NodeRedBlack[T] {
 	node := rb.root
 	for node != rb.blackNodeSentinel && node.key != val {
 		if val <= node.key {
@@ -78,6 +72,54 @@ func (rb *RedBlackTree[T]) GetNode(val T) *NodeRedBlack[T] {
 	return node
 }
 
+// Walking entire nodes in the tree. Return an array nodes in the tree
+func (rb *RedBlackTree[T]) InorderWalk() []*NodeRedBlack[T] {
+	store := make([]*NodeRedBlack[T], 0)
+	if rb.root != rb.blackNodeSentinel {
+		store = rb.inorderHelper(rb.root, store)
+	}
+	return store
+}
+
+func (rb *RedBlackTree[T]) inorderHelper(root *NodeRedBlack[T], store []*NodeRedBlack[T]) []*NodeRedBlack[T] {
+	if root.left != rb.blackNodeSentinel {
+		store = rb.inorderHelper(root.left, store)
+	}
+	store = append(store, root)
+	if root.right != rb.blackNodeSentinel {
+		store = rb.inorderHelper(root.right, store)
+	}
+	return store
+}
+
+func (rb *RedBlackTree[T]) GetRoot() *NodeRedBlack[T] {
+	return rb.root
+}
+
+/// +++++++ func for Node
+func (node NodeRedBlack[T]) GetColor() bool {
+	return node.color
+}
+
+func (node NodeRedBlack[T]) GetKey() T {
+	return node.key
+}
+
+func (node NodeRedBlack[T]) GetParent() *NodeRedBlack[T] {
+	return node.parent
+}
+
+func (node NodeRedBlack[T]) GetLeft() *NodeRedBlack[T] {
+	return node.left
+}
+
+func (node NodeRedBlack[T]) GetRight() *NodeRedBlack[T] {
+	return node.right
+}
+
+/// -------
+
+// Nhận vào value, thực hiện insert cho cây nhị phân. Lưu ý: func insertFix
 func (rb *RedBlackTree[T]) Add(val T) {
 	// nếu cây empty thì node mới là root
 	// if rb.root == nil {
@@ -112,6 +154,7 @@ func (rb *RedBlackTree[T]) Add(val T) {
 	rb.numOfNode++
 }
 
+// Thực hiện đổi màu, cân bằng cây
 func (rb *RedBlackTree[T]) insertFix(node *NodeRedBlack[T]) {
 	for node.parent.color == Red {
 		if node.parent == node.parent.parent.left {
@@ -149,7 +192,7 @@ func (rb *RedBlackTree[T]) insertFix(node *NodeRedBlack[T]) {
 			}
 		}
 	}
-	// the root is always black color
+	// the root always is black color
 	rb.root.color = Black
 }
 
@@ -217,7 +260,7 @@ func (rb *RedBlackTree[T]) transplant(u, v *NodeRedBlack[T]) {
 }
 
 func (rb *RedBlackTree[T]) Delete(val T) error {
-	z := rb.GetNode(val)
+	z := rb.SearchNode(val)
 	if z == rb.blackNodeSentinel {
 		return fmt.Errorf("a value not have in the tree")
 	}
@@ -261,7 +304,7 @@ func (rb *RedBlackTree[T]) TreeMinimun(node *NodeRedBlack[T]) *NodeRedBlack[T] {
 	return node
 }
 
-// TODO: implement node right
+// Hàm phụ trợ cho delete
 func (rb *RedBlackTree[T]) deleteFixUp(nodeX *NodeRedBlack[T]) {
 	for nodeX != rb.root && nodeX.color == Black {
 		if nodeX == nodeX.parent.left {
@@ -289,7 +332,29 @@ func (rb *RedBlackTree[T]) deleteFixUp(nodeX *NodeRedBlack[T]) {
 				nodeX = rb.root
 			}
 		} else {
-
+			w := nodeX.parent.right
+			if w.color == Red {
+				w.color = Black
+				nodeX.parent.color = Red
+				rb.rotateRight(nodeX.parent)
+				w = nodeX.parent.right
+			}
+			if w.right.color == Black && w.left.color == Black {
+				w.color = Red
+				nodeX = nodeX.parent
+			} else {
+				if w.left.color == Black {
+					w.left.color = Black
+					w.color = Red
+					rb.rotateLeft(w)
+					w = nodeX.parent.left
+				}
+				w.color = nodeX.parent.color
+				nodeX.parent.color = Black
+				w.left.color = Black
+				rb.rotateRight(nodeX.parent)
+				nodeX = rb.root
+			}
 		}
 	}
 	nodeX.color = Black
