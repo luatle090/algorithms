@@ -8,6 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	Red   = algorithms.Red
+	Black = algorithms.Black
+)
+
 var dataRedBlack = []struct {
 	nums        []int
 	expectKey   []int
@@ -18,8 +23,15 @@ var dataRedBlack = []struct {
 	{
 		nums:        []int{41, 38, 31, 12, 19, 8},
 		expectKey:   []int{8, 12, 19, 31, 38, 41},
-		expectColor: []bool{algorithms.Red, algorithms.Black, algorithms.Red, algorithms.Black, algorithms.Black, algorithms.Black},
+		expectColor: []bool{Red, Black, Red, Black, Black, Black},
 		root:        38,
+		msgError:    []string{"must is", "len is"},
+	},
+	{
+		nums:        []int{26, 41, 47, 28, 30, 3, 7, 12, 19, 20, 16, 17, 38, 39, 35},
+		expectKey:   []int{3, 7, 12, 16, 17, 19, 20, 26, 28, 30, 35, 38, 39, 41, 47},
+		expectColor: []bool{Black, Black, Red, Black, Red, Red, Red, Black, Black, Black, Red, Red, Black, Black, Black},
+		root:        28,
 		msgError:    []string{"must is", "len is"},
 	},
 }
@@ -47,7 +59,7 @@ func TestAddNode(t *testing.T) {
 		// testing color
 		for i := range d.expectColor {
 			label := "red"
-			if d.expectColor[i] == algorithms.Black {
+			if d.expectColor[i] == Black {
 				label = "black"
 			}
 			assert.Equal(d.expectColor[i], arr[i].GetColor(), fmt.Sprintf("%v "+d.msgError[0]+" %s", arr[i].GetKey(), label))
