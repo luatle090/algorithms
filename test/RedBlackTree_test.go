@@ -67,3 +67,21 @@ func TestAddNode(t *testing.T) {
 
 	}
 }
+
+// tìm element nhỏ thứ i trong mảng ko sắp xếp
+func TestK_Element(t *testing.T) {
+	assert := assert.New(t)
+	rankTest := 6
+	for _, d := range dataRedBlack {
+		tree := algorithms.CreateOrderStatistic[int]()
+		for i := range d.nums {
+			tree.Add(d.nums[i])
+		}
+
+		assert.Equal(len(d.nums), tree.GetSize(), d.msgError[1])
+
+		node := algorithms.OsSelect[int](tree.GetRoot(), rankTest)
+		rank := tree.OsRank(node)
+		assert.Equal(rankTest, rank, fmt.Sprintf("%v is an element %vth smallest", node.GetKey(), rankTest))
+	}
+}
