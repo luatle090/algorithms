@@ -36,6 +36,23 @@ var dataRedBlack = []struct {
 	},
 }
 
+var dataRedBlackDelete = []struct {
+	nums        []int
+	delete      []int
+	expectKey   []int
+	expectColor []bool
+	root        int
+	msgError    string
+}{
+	{
+		nums:        []int{41, 38, 31, 12, 19, 8},
+		delete:      []int{12, 41},
+		expectKey:   []int{8, 19, 31, 38},
+		expectColor: []bool{Black, Black, Red, Black},
+		root:        19,
+	},
+}
+
 func TestAddNode(t *testing.T) {
 	assert := assert.New(t)
 	for _, d := range dataRedBlack {
@@ -68,8 +85,33 @@ func TestAddNode(t *testing.T) {
 	}
 }
 
+func TestDeleteNode(t *testing.T) {
+	assert := assert.New(t)
+
+	for _, d := range dataRedBlackDelete {
+		tree := algorithms.CreateRedBlackTree[int]()
+		for i := range d.nums {
+			tree.Add(d.nums[i])
+		}
+
+		assert.Equal(len(d.nums), tree.GetSize())
+
+		for i := range d.delete {
+			tree.Delete(d.delete[i])
+		}
+
+		assert.Equal(d.root, tree.GetRoot().GetKey())
+
+		arr := tree.InorderWalk()
+
+		for i := range d.expectColor {
+			assert.Equal(d.expectColor[i], arr[i].GetColor())
+		}
+	}
+}
+
 // tìm element nhỏ thứ i trong mảng ko sắp xếp
-func TestK_Element(t *testing.T) {
+func TestK_Element_Smallest(t *testing.T) {
 	assert := assert.New(t)
 	rankTest := 6
 	for _, d := range dataRedBlack {
@@ -83,5 +125,28 @@ func TestK_Element(t *testing.T) {
 		node := algorithms.OsSelect[int](tree.GetRoot(), rankTest)
 		rank := tree.OsRank(node)
 		assert.Equal(rankTest, rank, fmt.Sprintf("%v is an element %vth smallest", node.GetKey(), rankTest))
+	}
+}
+
+// tìm element lớn thứ i trong mảng ko sắp xếp
+func TestK_Element_Largest(t *testing.T) {
+	assert := assert.New(t)
+	rankTest := 3
+	for _, d := range dataRedBlack {
+		rank := rankTest // reset rank for next loop
+		tree := algorithms.CreateOrderStatistic[int]()
+		for i := range d.nums {
+			tree.Add(d.nums[i])
+		}
+
+		assert.Equal(len(d.nums), tree.GetSize(), d.msgError[1])
+
+		// đổi sang largest
+		rank = tree.GetSize() - rankTest + 1
+
+		node := algorithms.OsSelect[int](tree.GetRoot(), rank)
+		rankNode := tree.OsRank(node)
+		fmt.Println("value node", node.GetKey(), ", rank actual in the tree", rankNode)
+		assert.Equal(rank, rankNode, fmt.Sprintf("%v is an element %vth largest", node.GetKey(), rankTest))
 	}
 }

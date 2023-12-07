@@ -248,18 +248,23 @@ func (t *RedBlackTree[T]) rotateRight(node *NodeRedBlack[T]) {
 	node.parent = x
 }
 
+// Trước khi loại bỏ node u cần cập nhật lại node v và u.parent, cũng như root nếu u đang là root
+// cập nhật node con của u trỏ vào u.parent và u.parent.left trỏ vào v và tương tự với v.parent nhận u.parent là cha
 func (rb *RedBlackTree[T]) transplant(u, v *NodeRedBlack[T]) {
 	if u.parent == rb.blackNodeSentinel {
+		// v là root khi u là root và u.parent là sentinel
 		rb.root = v
 	} else if u == u.parent.left {
-		u.parent.left = v
+		u.parent.left = v // trỏ left của parent của node u vào v
 	} else {
 		u.parent.right = v
 	}
+	// cập nhật lại parent của v
 	v.parent = u.parent
 }
 
 func (rb *RedBlackTree[T]) Delete(val T) error {
+	// Loại bỏ node z
 	z := rb.SearchNode(val)
 	if z == rb.blackNodeSentinel {
 		return fmt.Errorf("a value not have in the tree")
@@ -267,13 +272,17 @@ func (rb *RedBlackTree[T]) Delete(val T) error {
 	y := z
 	originalColorOfNodeY := y.color
 	x := z
+
 	if z.left == rb.blackNodeSentinel {
+		// node z ko có node con trái
 		x = z.right
 		rb.transplant(z, z.right)
 	} else if z.right == rb.blackNodeSentinel {
+		// node z ko có con phải
 		x = z.left
 		rb.transplant(z, z.left)
 	} else {
+		// trường hợp có đủ 2 con
 		y = rb.TreeMinimun(z.right)
 		originalColorOfNodeY = y.color
 		x = y.right
@@ -332,19 +341,19 @@ func (rb *RedBlackTree[T]) deleteFixUp(nodeX *NodeRedBlack[T]) {
 				nodeX = rb.root
 			}
 		} else {
-			w := nodeX.parent.right
+			w := nodeX.parent.left
 			if w.color == Red {
 				w.color = Black
 				nodeX.parent.color = Red
 				rb.rotateRight(nodeX.parent)
-				w = nodeX.parent.right
+				w = nodeX.parent.left
 			}
 			if w.right.color == Black && w.left.color == Black {
 				w.color = Red
 				nodeX = nodeX.parent
 			} else {
 				if w.left.color == Black {
-					w.left.color = Black
+					w.right.color = Black
 					w.color = Red
 					rb.rotateLeft(w)
 					w = nodeX.parent.left
