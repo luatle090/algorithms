@@ -12,6 +12,8 @@ type LinkedListDouble[T comparable] struct {
 
 type NodeDouble[T comparable] struct {
 	value     T
+	rank      int // variable này dùng cho LRU cache
+	key       T   // variable này dùng cho LRU cache
 	next, pre *NodeDouble[T]
 }
 
@@ -107,7 +109,7 @@ func (link *LinkedList[T]) Contains(t T) bool {
 }
 
 // khởi tạo dummy header
-func InitLinkedLinkDouble[T comparable](v T) *LinkedListDouble[T] {
+func InitLinkedLinkDouble[T comparable]() *LinkedListDouble[T] {
 	node := &NodeDouble[T]{next: nil, pre: nil}
 	link := &LinkedListDouble[T]{
 		header: node,
@@ -117,8 +119,8 @@ func InitLinkedLinkDouble[T comparable](v T) *LinkedListDouble[T] {
 }
 
 // add theo last node
-func (link *LinkedListDouble[T]) AddNode(v T) {
-	node := &NodeDouble[T]{value: v}
+func (link *LinkedListDouble[T]) AddNode(k, v T) {
+	node := &NodeDouble[T]{key: k, value: v, rank: -1}
 	// last node cần trỏ vào dummy header
 	node.next = link.header
 
@@ -133,4 +135,19 @@ func (link *LinkedListDouble[T]) AddNode(v T) {
 
 	// pre của header trỏ vào node mới
 	link.header.pre = node
+
+	// cập nhật lại length
+	link.Length++
+}
+
+// Removes the first element from the double link list
+func (link *LinkedListDouble[T]) PopFront() {
+	node := link.header.next.next
+	node.pre = link.header
+	link.header.next = node
+	link.Length--
+}
+
+func (link *LinkedListDouble[T]) IsEmpty() bool {
+	return link.Length == 0
 }

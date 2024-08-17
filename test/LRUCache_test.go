@@ -39,6 +39,20 @@ func TestLRUCache(t *testing.T) {
 			},
 		},
 		{
+			capacity: 1,
+			suitTest: []cacheData{
+				{key: 1, value: 1, operator: put, expected: 0},
+				{key: 2, value: 2, operator: put, expected: 0},
+				{key: 1, value: 2, operator: get, expected: -1},
+				{key: 3, value: 3, operator: put, expected: 0},
+				{key: 2, value: 3, operator: get, expected: -1},
+				{key: 4, value: 4, operator: put, expected: 0},
+				{key: 1, value: 4, operator: get, expected: -1},
+				{key: 3, value: 4, operator: get, expected: -1},
+				{key: 4, value: 4, operator: get, expected: 4},
+			},
+		},
+		{
 			capacity: 4,
 			suitTest: []cacheData{
 				{key: 1, value: 1, operator: put, expected: 0},
@@ -77,7 +91,11 @@ func TestLRUCache(t *testing.T) {
 			actual := DoOperat(d.key, d.value, d.operator, &lru)
 			require.Equal(d.expected, actual, fmt.Sprintf("%d %d %s", d.key, d.value, d.operator))
 		}
+
+		// Kiểm tra tính đơn điệu của cache. Vì policy LRU nghĩa là rank sẽ tăng đơn điệu
+		require.Equal(true, lru.TestIncreaseMonotonic(), "expected cache monotonic")
 	}
+
 }
 
 // func TestFindLowestRank(t *testing.T) {
