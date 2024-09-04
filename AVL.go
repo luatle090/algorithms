@@ -21,7 +21,7 @@ type AVLTree[T Ordered] struct {
 
 var HeightNodeParrent = 1
 
-func initBinaryNode[T Ordered](val T) *BinaryNode[T] {
+func InitBinaryNode[T Ordered](val T) *BinaryNode[T] {
 	return &BinaryNode[T]{val: val, Left: nil, Right: nil, height: 0}
 }
 
@@ -60,7 +60,7 @@ func (node *BinaryNode[T]) inorder() {
 
 func (bt *AVLTree[T]) AddNode(val T) {
 	if bt.Root == nil {
-		bt.Root = initBinaryNode(val)
+		bt.Root = InitBinaryNode(val)
 	} else {
 		bt.Root = bt.Root.add(val)
 	}
@@ -119,7 +119,7 @@ func (node *BinaryNode[T]) add(val T) *BinaryNode[T] {
 // Điều kiện dừng khi node parent là nil.
 func (node *BinaryNode[T]) addToSubTree(parent *BinaryNode[T], val T) *BinaryNode[T] {
 	if parent == nil {
-		return initBinaryNode(val)
+		return InitBinaryNode(val)
 	}
 	parent = parent.add(val)
 	return parent
